@@ -38,7 +38,7 @@ app.post("/api/transactions", async (req, res) => {
 
 app.get("/api/transactions/:userId", async (req, res) => {
   try {
-    const { userId } = req.params
+    const { userId } = req.params;
 
     const transactions = await sql`
             SELECT * FROM transactions WHERE user_id = ${userId} ORDER BY created_at DESC
@@ -52,24 +52,51 @@ app.get("/api/transactions/:userId", async (req, res) => {
 
 app.delete("/api/transactions/:id", async (req, res) => {
   try {
-    const {id} = req.params
+    const { id } = req.params;
     // console.log(typeof id)
-    if(isNaN(parseInt(id))){
-        return res.status(400).json({message:"Invalid transaction ID"})
+    if (isNaN(parseInt(id))) {
+      return res.status(400).json({ message: "Invalid transaction ID" });
     }
     const result = await sql`
         DELETE FROM transactions WHERE id = ${id} RETURNING *
-    `
-    if(result.length === 0){
-        return res.status(404).json({message: "Transaction not found"})
+    `;
+    if (result.length === 0) {
+      return res.status(404).json({ message: "Transaction not found" });
     }
 
     res.status(200).json({
-        message:"Transaction deleted successfully"
-    })
-
+      message: "Transaction deleted successfully",
+    });
   } catch (error) {
-    console.log("Error getting the transactions", error);
+    console.log("Error deleting the transactions", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// balance = [{ balance: 400 }]
+
+app.get("/api/transactions/summary/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const balance = await sql`
+            SELECT COALESCE(SUM(amount),0) as balance FROM transactions WHERE user_id = ${userId}
+        `;
+
+    const income = await sql`
+            SELECT COALESCE(SUM(amount),0) as income FROM transactions WHERE user_id = ${userId} AND amount > 0
+        `;
+    const expense = await sql`
+            SELECT COALESCE(SUM(amount),0) as expense FROM transactions WHERE user_id = ${userId} AND amount < 0
+        `;
+
+    return res.status(200).json({
+      balance: balance[0].balance,
+      income: income[0].income,
+      expense: expense[0].expense,
+    });
+  } catch (error) {
+    console.log("Error getting the summary", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
