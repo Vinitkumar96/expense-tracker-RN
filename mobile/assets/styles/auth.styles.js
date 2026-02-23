@@ -93,10 +93,8 @@ export const styles = StyleSheet.create({
   // 🔴 Error styles
   errorBox: {
     backgroundColor: "#FFE5E5",
-    padding: 12,
+    padding: 8,
     borderRadius: 8,
-    borderLeftWidth: 4,
-    borderLeftColor: COLORS.expense,
     marginBottom: 16,
     flexDirection: "row",
     alignItems: "center",

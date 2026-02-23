@@ -3,7 +3,12 @@
 import { useSignIn } from '@clerk/clerk-expo'
 import { Link, useRouter } from 'expo-router'
 import * as React from 'react'
-import { Pressable, StyleSheet, TextInput, View,Text } from 'react-native'
+import { Pressable, StyleSheet, TextInput, View,Text,TouchableOpacity, Image } from 'react-native'
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { styles } from '../../assets/styles/auth.styles'
+import { Ionicons } from "@expo/vector-icons";
+import { COLORS } from "../../constants/colors";
+import { Platform } from 'react-native';
 
 export default function Page() {
   const { signIn, setActive, isLoaded } = useSignIn()
@@ -13,6 +18,7 @@ export default function Page() {
   const [password, setPassword] = React.useState('')
   const [code, setCode] = React.useState('')
   const [showEmailCode, setShowEmailCode] = React.useState(false)
+  const[error,setError] = React.useState("")
 
   // Handle the submission of the sign-in form
   const onSignInPress = React.useCallback(async () => {
@@ -41,7 +47,9 @@ export default function Page() {
             router.replace('/')
           },
         })
-      } else if (signInAttempt.status === 'needs_second_factor') {
+      } 
+  
+      else if (signInAttempt.status === 'needs_second_factor') {
         // Check if email_code is a valid second factor
         // This is required when Client Trust is enabled and the user
         // is signing in from a new device.
@@ -57,15 +65,19 @@ export default function Page() {
           })
           setShowEmailCode(true)
         }
-      } else {
+      } 
+   
+      else {
         // If the status is not complete, check why. User may need to
         // complete further steps.
         console.error(JSON.stringify(signInAttempt, null, 2))
       }
     } catch (err) {
-      // See https://clerk.com/docs/guides/development/custom-flows/error-handling
-      // for more info on error handling
-      console.error(JSON.stringify(err, null, 2))
+      if (err.errors?.[0]?.code === "form_password_incorrect") {
+        setError("Password is incorrect. Please try again.");
+      } else {
+        setError("An error occurred. Please try again.");
+      }
     }
   }, [isLoaded, signIn, setActive, router, emailAddress, password])
 
@@ -104,15 +116,15 @@ export default function Page() {
   // Display email code verification form
   if (showEmailCode) {
     return (
-      <View style={styles.container}>
-        <Text type="title" style={styles.title}>
+      <View >
+        <Text type="title" >
           Verify your email
         </Text>
-        <Text style={styles.description}>
+        <Text >
           A verification code has been sent to your email.
         </Text>
         <TextInput
-          style={styles.input}
+         
           value={code}
           placeholder="Enter verification code"
           placeholderTextColor="#666666"
@@ -120,108 +132,87 @@ export default function Page() {
           keyboardType="numeric"
         />
         <Pressable
-          style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
+         
           onPress={onVerifyPress}
         >
-          <Text style={styles.buttonText}>Verify</Text>
+          <Text>Verify</Text>
         </Pressable>
       </View>
     )
   }
 
   return (
-    <View style={styles.container}>
-      <Text type="title" style={styles.title}>
-        Sign in
+    <KeyboardAwareScrollView style={{flex:1}} contentContainerStyle={{flexGrow:1}}
+     enableOnAndroid={true} enableAutomaticScroll={true} 
+     extraScrollHeight={30}
+     >
+
+
+    <View style={styles.container} >
+
+      <View style={{alignItems:"center"}}>
+          <Image source={require("../../assets/images/revenue-i4.png")} style={styles.illustration} />
+      </View>
+      
+
+      <Text type="title" style={styles.title} >
+        Welcome Back
       </Text>
-      <Text style={styles.label}>Email address</Text>
+
+
+         {error ? (
+          <View style={styles.errorBox}>
+            <Ionicons name="alert-circle" size={20} color={COLORS.expense} />
+            <Text style={styles.errorText}>{error}</Text>
+            <TouchableOpacity onPress={() => setError("")}>
+              <Ionicons name="close" size={20} color={COLORS.textLight} />
+            </TouchableOpacity>
+          </View>
+        ) : null}
+
+
       <TextInput
-        style={styles.input}
+      style={[styles.input]}
         autoCapitalize="none"
         value={emailAddress}
         placeholder="Enter email"
-        placeholderTextColor="#666666"
+        placeholderTextColor="#9A8478"
         onChangeText={(emailAddress) => setEmailAddress(emailAddress)}
         keyboardType="email-address"
       />
-      <Text style={styles.label}>Password</Text>
+  
       <TextInput
-        style={styles.input}
+        style={[styles.input]}
         value={password}
         placeholder="Enter password"
-        placeholderTextColor="#666666"
+         placeholderTextColor="#9A8478"
         secureTextEntry={true}
         onChangeText={(password) => setPassword(password)}
       />
+
       <Pressable
-        style={({ pressed }) => [
-          styles.button,
-          (!emailAddress || !password) && styles.buttonDisabled,
-          pressed && styles.buttonPressed,
-        ]}
+        style={styles.button}
         onPress={onSignInPress}
         disabled={!emailAddress || !password}
       >
         <Text style={styles.buttonText}>Sign in</Text>
       </Pressable>
-      <View style={styles.linkContainer}>
-        <Text>Don't have an account? </Text>
+
+      <View style={styles.footerContainer} >
+        <Text style={styles.footerText}>{
+          Platform.OS === "ios" ? (
+            "Don't have an account ?"
+          ): (
+            "Don't have an account ?    "
+          )
+          }</Text>
         <Link href="/sign-up">
-          <Text type="link">Sign up</Text>
+          <Text type="link" style={styles.linkText}>Sign up</Text>
         </Link>
       </View>
     </View>
+
+    </KeyboardAwareScrollView>
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    gap: 12,
-  },
-  title: {
-    marginBottom: 8,
-  },
-  description: {
-    fontSize: 14,
-    marginBottom: 16,
-    opacity: 0.8,
-  },
-  label: {
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: '#fff',
-  },
-  button: {
-    backgroundColor: '#0a7ea4',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  buttonPressed: {
-    opacity: 0.7,
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  linkContainer: {
-    flexDirection: 'row',
-    gap: 4,
-    marginTop: 12,
-    alignItems: 'center',
-  },
-})
