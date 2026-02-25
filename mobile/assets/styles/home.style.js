@@ -8,6 +8,7 @@ export const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   content: {
+    flex: 1,
     padding: 20,
     paddingBottom: 0,
   },
@@ -257,6 +258,7 @@ export const styles = StyleSheet.create({
   transactionsList: {
     flex: 1,
     marginHorizontal: 20,
+    backgroundColor:"green"
   },
   transactionsListContent: {
     paddingBottom: 20,
