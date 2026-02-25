@@ -258,7 +258,6 @@ export const styles = StyleSheet.create({
   transactionsList: {
     flex: 1,
     marginHorizontal: 20,
-    backgroundColor:"green"
   },
   transactionsListContent: {
     paddingBottom: 20,

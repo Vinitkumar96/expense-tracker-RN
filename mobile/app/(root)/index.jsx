@@ -3,7 +3,7 @@ import { SignedIn, SignedOut, useSession, useUser } from '@clerk/clerk-expo'
 import { Link, router, useRouter } from 'expo-router'
 import { StyleSheet, View,Text,Image, TouchableOpacity, FlatList, Alert, RefreshControl } from 'react-native'
 import useTransactions from '../../hooks/useTransactions'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import PageLoader from '../../components/PageLoader'
 import { styles } from '../../assets/styles/home.style'
 import { Ionicons } from '@expo/vector-icons'
@@ -19,12 +19,19 @@ export default function Page() {
   const {transactions,summary,isLoading, loadData,deleteTransaction}= useTransactions(user.id)
 
   const router = useRouter()
+  const[refreshing,setRefreshing] = useState(false)
 
   // If your user isn't appearing as signed in,
   // it's possible they have session tasks to complete.
   // Learn more: https://clerk.com/docs/guides/configure/session-tasks
   const { session } = useSession()
   console.log(session?.currentTask)
+
+  const onRefresh = async () => {
+    setRefreshing(true)
+    await loadData();
+    setRefreshing(false)
+  }
 
   useEffect(()=>{
     loadData()
@@ -34,7 +41,7 @@ export default function Page() {
   console.log("summary",summary);
   console.log(user.id);
 
-  if(isLoading){
+  if(isLoading && !refreshing){
     return <PageLoader/>
   }
 
@@ -81,6 +88,7 @@ export default function Page() {
             renderItem={({ item }) => <TransactionItem item={item} onDelete={handleDelete} />}
             ListEmptyComponent={<NoTransactionsFound />}
             showsVerticalScrollIndicator={false} 
+             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
            
         />
       
