@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { styles } from "../assets/styles/home.style";
 import { COLORS } from "../constants/colors";
@@ -35,7 +35,7 @@ export const TransactionItem = ({ item, onDelete }) => {
           >
             {isIncome ? "+" : "-"}${Math.abs(parseFloat(item.amount)).toFixed(2)}
           </Text>
-          <Text style={styles.transactionDate}>{formatDate(item.created_at)}</Text>
+          <Text style={styles.transactionDate}>{formatDate(item.created_at)}{Platform.OS === "android" ? "  " : ""}</Text>
         </View>
       </TouchableOpacity>
       <TouchableOpacity style={styles.deleteButton} onPress={() => onDelete(item.id)}>

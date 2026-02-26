@@ -135,7 +135,7 @@ export const styles = StyleSheet.create({
   transactionCard: {
     backgroundColor: COLORS.card,
     borderRadius: 12,
-    marginBottom: 10,
+    marginBottom: 12,
     flexDirection: "row",
     alignItems: "center",
     shadowColor: COLORS.shadow,
@@ -143,9 +143,9 @@ export const styles = StyleSheet.create({
       width: 0,
       height: 1,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    borderWidth:1,
+    borderColor:"gray",
+    borderStyle:"dashed"
   },
   transactionContent: {
     flex: 1,
@@ -257,7 +257,7 @@ export const styles = StyleSheet.create({
   },
   transactionsList: {
     flex: 1,
-    marginHorizontal: 20,
+    marginHorizontal: 10,
   },
   transactionsListContent: {
     paddingBottom: 20,

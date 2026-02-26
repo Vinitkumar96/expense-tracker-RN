@@ -1,0 +1,1 @@
+export const API_URL = "https://expense-tracker-rn-837c.onrender.com/api"
